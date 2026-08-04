@@ -10,12 +10,13 @@ import SwiftData
 
 struct ContentView: View {
     @Query(sort: \Task.createdAt) private var tasks: [Task]
+    @Environment(\.modelContext) private var context
     
     var body: some View {
         NavigationStack {
             List(tasks, id: \.self) { task in
                 VStack {
-                    Text("\(task.title)")
+                    ListItem(task: task)
                 }
             }
             .navigationTitle("Tasks")
@@ -23,6 +24,7 @@ struct ContentView: View {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
                         // open createTask view
+                        context.insert(Task(title: "NewTask \(Int.random(in: 0..<1000))"))
                     } label: {
                         Image(systemName: "plus")
                     }
