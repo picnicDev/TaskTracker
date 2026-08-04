@@ -9,15 +9,18 @@ import SwiftUI
 import SwiftData
 
 struct ContentView: View {
-    @Query(sort: \Task.createdAt) private var tasks: [Task]
+    @Query(sort: \Task.createdAt, order: .forward) private var tasks: [Task]
     @Environment(\.modelContext) private var context
     
     @State private var isPresented: Bool = false
+    @State private var selectedTask: Task? = nil
     
     var body: some View {
         NavigationStack {
             List(tasks, id: \.self) { task in
-                VStack {
+                Button {
+                    selectedTask = task
+                } label: {
                     ListItem(task: task)
                 }
             }
@@ -25,15 +28,18 @@ struct ContentView: View {
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
-                        // open createTask view
                         isPresented = true
                     } label: {
                         Image(systemName: "plus")
                     }
                 }
             }
+            .sheet(item: $selectedTask) { task in
+                ModifyTaskView(task: task)
+                    .presentationDragIndicator(.visible)
+            }
             .sheet(isPresented: $isPresented) {
-                ModifyTaskView()
+                ModifyTaskView(task: nil)
                     .presentationDragIndicator(.visible)
             }
         }
