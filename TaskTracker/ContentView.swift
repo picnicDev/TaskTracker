@@ -6,19 +6,46 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct ContentView: View {
+    @Query(sort: \Task.createdAt) private var tasks: [Task]
+    
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
+        NavigationStack {
+            List(tasks, id: \.self) { task in
+                VStack {
+                    Text("\(task.title)")
+                }
+            }
+            .navigationTitle("Tasks")
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        // open createTask view
+                    } label: {
+                        Image(systemName: "plus")
+                    }
+                }
+            }
         }
-        .padding()
     }
 }
 
 #Preview {
     ContentView()
+        .modelContainer(previewContainer)
 }
+
+private let previewContainer: ModelContainer = {
+    let schema = Schema(Task.self)
+    let configuration = ModelConfiguration(isStoredInMemoryOnly: true)
+    let modelContainer = try! ModelContainer(for: schema, configurations: configuration)
+    
+    let context = modelContainer.mainContext
+    context.insert(Task(title: "Task 1"))
+    context.insert(Task(title: "Task 2"))
+    context.insert(Task(title: "Task 3"))
+    
+    return modelContainer
+}()
