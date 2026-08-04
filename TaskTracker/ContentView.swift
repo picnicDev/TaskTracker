@@ -12,6 +12,8 @@ struct ContentView: View {
     @Query(sort: \Task.createdAt) private var tasks: [Task]
     @Environment(\.modelContext) private var context
     
+    @State private var isPresented: Bool = false
+    
     var body: some View {
         NavigationStack {
             List(tasks, id: \.self) { task in
@@ -24,11 +26,15 @@ struct ContentView: View {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
                         // open createTask view
-                        context.insert(Task(title: "NewTask \(Int.random(in: 0..<1000))"))
+                        isPresented = true
                     } label: {
                         Image(systemName: "plus")
                     }
                 }
+            }
+            .sheet(isPresented: $isPresented) {
+                ModifyTaskView()
+                    .presentationDragIndicator(.visible)
             }
         }
     }
