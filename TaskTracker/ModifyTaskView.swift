@@ -14,23 +14,15 @@ struct ModifyTaskView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var title: String = ""
     @State private var isDone: Bool = false
+    @State private var priority: Int = 0
+    @State private var setDueDate: Bool = false
+    @State private var dueDate: Date = .now
     
     @State private var originalTitle: String = ""
     @State private var originalIsDone: Bool = false
-    
-    private var canSave: Bool {
-        let trimmed = title.trimmingCharacters(in: .whitespacesAndNewlines)
-        let hasTitle = !trimmed.isEmpty
-        if let _ = task {
-            // editing: enable only if there is a change and title is present
-            let changed = (title != originalTitle) || (isDone != originalIsDone)
-            return hasTitle && changed
-        } else {
-            // creating: enable only if title is present
-            return hasTitle
-        }
-    }
-    
+    @State private var originalPriority: Int = 0
+    @State private var originalDueDate: Date? = nil
+ 
     var body: some View {
         NavigationStack {
             VStack {
@@ -53,16 +45,61 @@ struct ModifyTaskView: View {
                 }
                 
                 Spacer()
+                    .frame(height: 16)
+                
+                Section {
+                    HStack {
+                        Text("Priority")
+                            .font(.headline)
+                        Spacer()
+                        Picker("Priority", selection: $priority) {
+                            ForEach(Range(0...5), id: \.self) { priority in
+                                Text("\(priority)").tag(priority)
+                            }
+                        }
+                    }
+                }
+                
+                Spacer()
+                    .frame(height: 16)
+                
+                Section {
+                    Toggle("DueDate", isOn: $setDueDate)
+                        .font(.headline)
+                    
+                    if setDueDate {
+                        DatePicker("", selection: $dueDate, displayedComponents: [.date])
+                            .font(.headline)
+                    }
+                        
+                }
+                
+                Spacer()
             }
             .onAppear {
                 if let task {
                     title = task.title
                     isDone = task.isDone
+                    priority = task.priority
                     originalTitle = task.title
                     originalIsDone = task.isDone
+                    originalPriority = task.priority
+
+                    if let originalDueDate = task.dueDate {
+                        setDueDate = true
+                        self.originalDueDate = originalDueDate
+                        dueDate = originalDueDate
+                    } else {
+                        setDueDate = false
+                        self.originalDueDate = nil
+                        // dueDate는 DatePicker 기본값으로 유지 (비교에는 사용되지 않음)
+                    }
                 } else {
                     originalTitle = ""
                     originalIsDone = false
+                    originalPriority = 0
+                    originalDueDate = nil
+                    setDueDate = false
                 }
             }
             .padding(.horizontal)
@@ -71,12 +108,17 @@ struct ModifyTaskView: View {
                     Button {
                         // save
                         if let task {
-                            // update existing
                             task.title = title
                             task.isDone = isDone
+                            task.priority = priority
+                            task.dueDate = setDueDate ? dueDate : nil
                         } else {
-                            // create new
-                            let newTask = Task(title: title, isDone: isDone)
+                            let newTask = Task(
+                                title: title,
+                                isDone: isDone,
+                                priority: priority,
+                                dueDate: setDueDate ? dueDate : nil
+                            )
                             context.insert(newTask)
                         }
                         dismiss()
@@ -86,6 +128,37 @@ struct ModifyTaskView: View {
                     .disabled(!canSave)
                 }
             }
+        }
+    }
+    
+    private var canSave: Bool {
+        let trimmed = title.trimmingCharacters(in: .whitespacesAndNewlines)
+        let hasTitle = !trimmed.isEmpty
+        if let _ = task {
+            // editing: enable only if there is a change and title is present
+            let originalHasDueDate = (originalDueDate != nil)
+            let dueDateChanged: Bool = {
+                switch (setDueDate, originalHasDueDate) {
+                case (false, false):
+                    // 둘 다 없음 -> 변경 없음
+                    return false
+                case (true, true):
+                    // 둘 다 있음 -> 값 비교
+                    return dueDate != originalDueDate!
+                default:
+                    // 한쪽만 있음 -> 변경 있음
+                    return true
+                }
+            }()
+            let changed = (title != originalTitle)
+                || (isDone != originalIsDone)
+                || (priority != originalPriority)
+                || dueDateChanged
+
+            return hasTitle && changed
+        } else {
+            // creating: enable only if title is present
+            return hasTitle
         }
     }
 }
