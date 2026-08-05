@@ -66,7 +66,7 @@ enum TaskSchemaV3: VersionedSchema {
         [Task.self]
     }
     
-    enum TaskStatus: String, Codable {
+    enum TaskStatus: String, Codable, CaseIterable {
         case todo
         case inProgress
         case done

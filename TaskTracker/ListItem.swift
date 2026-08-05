@@ -12,7 +12,15 @@ struct ListItem: View {
     
     var body: some View {
         HStack {
-            Text("\(task.title)")
+            VStack(alignment: .leading) {
+                Text("\(task.title)")
+                HStack {
+                    Text("status: \(task.status.rawValue)")
+                    Text("/ priority: \(task.priority)")
+                    Text("/ dueDate: \(task.dueDate?.description ?? "none")")
+                }
+                .font(.caption)
+            }
             Spacer()
             Image(systemName: task.isDone ? "checkmark.circle" : "x.circle")
                 .foregroundStyle(task.isDone ? .green : .red)

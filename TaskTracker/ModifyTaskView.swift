@@ -17,12 +17,14 @@ struct ModifyTaskView: View {
     @State private var priority: Int = 0
     @State private var setDueDate: Bool = false
     @State private var dueDate: Date = .now
+    @State private var status: TaskStatus = .todo
     
     @State private var originalTitle: String = ""
     @State private var originalIsDone: Bool = false
     @State private var originalPriority: Int = 0
     @State private var originalDueDate: Date? = nil
- 
+    @State private var ofiginalStatus: TaskStatus = .todo
+    
     var body: some View {
         NavigationStack {
             VStack {
@@ -42,6 +44,22 @@ struct ModifyTaskView: View {
                 Section {
                     Toggle("isDone", isOn: $isDone)
                         .font(.headline)
+                }
+                
+                Spacer()
+                    .frame(height: 16)
+                
+                Section {
+                    HStack {
+                        Text("Status")
+                            .font(.headline)
+                        Spacer()
+                        Picker("Status", selection: $status) {
+                            ForEach(TaskStatus.allCases, id: \.self) { status in
+                                Text(status.rawValue)
+                            }
+                        }
+                    }
                 }
                 
                 Spacer()
@@ -71,9 +89,8 @@ struct ModifyTaskView: View {
                         DatePicker("", selection: $dueDate, displayedComponents: [.date])
                             .font(.headline)
                     }
-                        
                 }
-                
+  
                 Spacer()
             }
             .onAppear {
