@@ -96,7 +96,7 @@ enum TaskSchemaV4: VersionedSchema {
     static var versionIdentifier = Schema.Version(4, 0, 0)
     static var models: [any PersistentModel.Type] { [Task.self] }
 
-    enum TaskStatus: String, Codable {
+    enum TaskStatus: String, Codable, CaseIterable {
         case todo
         case inProgress
         case done
@@ -105,19 +105,12 @@ enum TaskSchemaV4: VersionedSchema {
     @Model
     class Task {
         @Attribute(.unique) var title: String
-        var status: TaskStatus
+        var status: TaskStatus = TaskStatus.todo
         var createdAt: Date
         var priority: Int = 0
         var dueDate: Date?
-        // isDone 완전히 제거됨
-
-        init(
-            title: String,
-            status: TaskStatus,
-            createdAt: Date,
-            priority: Int = 0,
-            dueDate: Date? = nil
-        ) {
+        
+        init(title: String, status: TaskStatus = .todo, createdAt: Date = .now, priority: Int = 0, dueDate: Date? = nil) {
             self.title = title
             self.status = status
             self.createdAt = createdAt

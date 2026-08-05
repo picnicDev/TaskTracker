@@ -11,7 +11,7 @@ import SwiftData
 @main
 struct TaskTrackerApp: App {
     var modelContainer: ModelContainer = {
-        let schema = Schema(versionedSchema: TaskSchemaV3.self)
+        let schema = Schema(versionedSchema: TaskSchemaV4.self)
         let config = ModelConfiguration(schema: schema)
         
         do {

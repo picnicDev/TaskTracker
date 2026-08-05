@@ -8,15 +8,15 @@
 import Foundation
 import SwiftData
 
-typealias Task = TaskSchemaV3.Task
-typealias TaskStatus = TaskSchemaV3.TaskStatus
+typealias Task = TaskSchemaV4.Task
+typealias TaskStatus = TaskSchemaV4.TaskStatus
 
 enum TaskMigrationPlan: SchemaMigrationPlan {
     static var schemas: [any VersionedSchema.Type] { [TaskSchemaV1.self, TaskSchemaV2.self, TaskSchemaV3.self, TaskSchemaV4.self]
     }
     
     static var stages: [MigrationStage] {
-        [migrateV1toV2, migrateV2toV3]
+        [migrateV1toV2, migrateV2toV3, migrateV3toV4]
     }
     
     static let migrateV1toV2 = MigrationStage.lightweight(

@@ -13,17 +13,15 @@ struct ModifyTaskView: View {
     @Environment(\.modelContext) private var context
     @Environment(\.dismiss) private var dismiss
     @State private var title: String = ""
-    @State private var isDone: Bool = false
     @State private var priority: Int = 0
     @State private var setDueDate: Bool = false
     @State private var dueDate: Date = .now
     @State private var status: TaskStatus = .todo
     
     @State private var originalTitle: String = ""
-    @State private var originalIsDone: Bool = false
     @State private var originalPriority: Int = 0
     @State private var originalDueDate: Date? = nil
-    @State private var ofiginalStatus: TaskStatus = .todo
+    @State private var originalStatus: TaskStatus = .todo
     
     var body: some View {
         NavigationStack {
@@ -36,14 +34,6 @@ struct ModifyTaskView: View {
                             .font(.headline)
                         Spacer()
                     }
-                }
-                
-                Spacer()
-                    .frame(height: 16)
-                
-                Section {
-                    Toggle("isDone", isOn: $isDone)
-                        .font(.headline)
                 }
                 
                 Spacer()
@@ -96,11 +86,11 @@ struct ModifyTaskView: View {
             .onAppear {
                 if let task {
                     title = task.title
-                    isDone = task.isDone
                     priority = task.priority
+                    status = task.status
                     originalTitle = task.title
-                    originalIsDone = task.isDone
                     originalPriority = task.priority
+                    originalStatus = task.status
 
                     if let originalDueDate = task.dueDate {
                         setDueDate = true
@@ -113,9 +103,9 @@ struct ModifyTaskView: View {
                     }
                 } else {
                     originalTitle = ""
-                    originalIsDone = false
                     originalPriority = 0
                     originalDueDate = nil
+                    originalStatus = .todo
                     setDueDate = false
                 }
             }
@@ -126,13 +116,13 @@ struct ModifyTaskView: View {
                         // save
                         if let task {
                             task.title = title
-                            task.isDone = isDone
                             task.priority = priority
+                            task.status = status
                             task.dueDate = setDueDate ? dueDate : nil
                         } else {
                             let newTask = Task(
                                 title: title,
-                                isDone: isDone,
+                                status: status,
                                 priority: priority,
                                 dueDate: setDueDate ? dueDate : nil
                             )
@@ -168,8 +158,8 @@ struct ModifyTaskView: View {
                 }
             }()
             let changed = (title != originalTitle)
-                || (isDone != originalIsDone)
                 || (priority != originalPriority)
+                || (status != originalStatus)
                 || dueDateChanged
 
             return hasTitle && changed
