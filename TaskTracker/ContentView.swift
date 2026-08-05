@@ -8,6 +8,8 @@
 import SwiftUI
 import SwiftData
 
+typealias Task = TaskSchemaV2.Task
+
 struct ContentView: View {
     @Query(sort: \Task.createdAt, order: .forward) private var tasks: [Task]
     @Environment(\.modelContext) private var context
